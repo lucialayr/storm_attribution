@@ -28,68 +28,57 @@ codes = list("al", "at", "by", "be", "ba",
             "pt", "ro", "rs", "sk", "si", 
             "es", "se", "ch", "ua","gb") # iso 3166
 
-# mode function
-mode <- function(v) {
-  uniqv <- unique(v)
-  uniqv[which.max(tabulate(match(v, uniqv)))]
-}
 
 # matrix for raster reclassification
 reclass_list = c(0, 1.5, NA, 2.5, 3.5, NA)
 reclass_m = matrix(reclass_list, ncol = 3, byrow = TRUE)
 
-for (i in c(2)) {
+for (i in c(1)) {
   print(paste(cnts[i], 'starting...'))
   
-  country = paste(cnts[i], 'finished')
+  country = paste(cnts[i], 'finished. Total time: ')
   tic(country)
   
-  #create polygon
-    tic("as polygons")
+  #create polygons for windthrows
+    tic("load and reclass disturbances")
       raster_1_path = paste0("data/attributed_disturbance_maps/agent_classes_", cnts[i], ".tif")
       raster_1 = terra::rast(raster_1_path)
-      raster_1_reclass = terra::classify(raster_1, reclass_m)
-      poly = terra::as.polygons(raster_1_reclass)
+      raster_1 = terra::classify(raster_1, reclass_m)
     toc(log = TRUE)
   
-    #tic("convert to simple feature")
-    #  poly = as(poly, "Spatial")
-    #  poly = as(poly, "sf" ) 
-    #  target_path = paste0(wd, "/data/intermed/windthrow_", cnts[i], ".shp" )
-    #toc(log = TRUE)
-  
-    tic("write shapefile")
-      target_path = paste0(wd, "/data/intermed/windthrow_", cnts[i], ".shp" )
-      writeVector(poly, target_path, overwrite=TRUE) # st_casts only works if shapefile is loaded from disk fsr
-    toc(log = TRUE)
-  
-    tic("create multiple polygons")
-      poly = st_read(target_path)
-      poly = st_cast(poly, "POLYGON")
-    toc(log = TRUE)
-  
-    print(paste0(cnts[i], ": Polygon created"))
-  
-  # add year and clean up attributes
-    tic("add attributes")
+    tic("load years")
       raster_2_path = paste0(wd, "/data/disturbance_maps/disturbance_year_grouped_", cnts[i], ".tif")
-      raster_2 = raster::raster(raster_2_path)
-      # beginCluster()
-      poly = dplyr::mutate(poly,
-                    year = raster::extract(raster_2, poly, fun = mean, na.rm = TRUE), # function ensures one value per polygon. If polygon contains more than one year, this will give an incorrect year. Watch our for non-integers in final file
-                    id = paste0(codes[i], "_", dplyr::row_number())) %>%
-        dplyr::select(-agent_clas)
-      endCluster()
-      print(paste0(cnts[i], ": attributes:", names(poly)))
+      raster_2 = terra::rast(raster_2_path)
     toc(log = TRUE)
 
-  # save file
-    tic("save final file")
-      target_path = paste0(wd, "/data/intermed/windthrow_", cnts[i], ".shp" )
-      st_write(poly, target_path, delete_dsn = TRUE)
+    tic("subset years for windthrow")
+      stack = c(raster_1, raster_2)
+      raster_3 = terra::lapp(stack, fun = function(raster_1, raster_2) {
+        raster_1 + raster_2 - raster_1 # add/substract windthrow from years turn all years != windthrow as NA
+      })
     toc(log = TRUE)
-  
-    remove(raster_1,  raster_2, poly, country)
+
+    tic("convert to polygon")
+      poly = terra::as.polygons(raster_3)
+    toc(log = TRUE)
+    
+    tic("safe, reload  as simple feature and cast")
+      target_path = paste0("data/intermed/windthrow_", cnts[i], ".shp" )
+      terra::writeVector(poly, target_path, delete_dsn = TRUE)
+      poly = st_read(target_path)
+      poly = st_cast(poly, to = "POLYGON")
+    toc(log = TRUE)
+    
+    
+    tic("clean up attributes")
+      poly = poly %>% dplyr::rename(year = lyr1) %>%
+        dplyr::mutate(id = paste0(codes[i], "_", dplyr::row_number()))
+    toc(log = TRUE)
+    
+    tic("save final shapefile")
+      st_write(poly, target_path, delete_dsn=TRUE)
+    toc(log = TRUE)
+    
   toc(log = TRUE)
   
   if (file.exists(target_path)) {
@@ -102,7 +91,24 @@ for (i in c(2)) {
 
 
 #textcountry small
-albania_year = raster::raster("data/disturbance_maps/disturbance_year_grouped_albania.tif")
+albania_year = terra::rast("data/disturbance_maps/disturbance_year_grouped_albania.tif")
+albania_disturbance = terra::rast("data/attributed_disturbance_maps/agent_classes_albania.tif")
+albania_windthrow = terra::classify(albania_disturbance, reclass_m)
+
+stack = c(albania_year, albania_windthrow)
+
+albania_windthrow_years = terra::lapp(stack, 
+                                   fun = function (albania_year, albania_windthrow) {
+                                     albania_year + albania_windthrow - albania_windthrow
+                                     # return(albania_year)
+                                     })
+
+albania_poly = terra::as.polygons(albania_windthrow_years)
+terra::writeVector(albania_poly, "albania_poly.shp")
+
+albania_shp = terra::as.polygons(stack_2)
+writeVector(albania_shp, "albania_shp.shp")
+
 albania_sf = st_read("data/intermed/windthrow_albania.shp")   %>% st_cast(albania_sf, to = "POLYGON")
 albania_sf = albania_sf  %>%
   dplyr::mutate(albania_sf,
