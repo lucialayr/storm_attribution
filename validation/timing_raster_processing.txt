@@ -1,0 +1,24 @@
+[1] "austria starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+as polygons: 8.84 sec elapsed
+convert to simple feature: 10498.52 sec elapsed
+Deleting source `C:/Users/Lucia/Documents/Diss/Projects/Storm_Attribution/data/intermed/windthrow_austria.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_austria' to data source `C:/Users/Lucia/Documents/Diss/Projects/Storm_Attribution/data/intermed/windthrow_austria.shp' using driver `ESRI Shapefile'
+Writing 1 features with 1 fields and geometry type Polygon.
+write shapefile: 74.42 sec elapsed
+Reading layer `windthrow_austria' from data source `C:\Users\Lucia\Documents\Diss\Projects\Storm_Attribution\data\intermed\windthrow_austria.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 1 field
+geometry type:  MULTIPOLYGON
+dimension:      XY
+bbox:           xmin: 4286618 ymin: 2599743 xmax: 4850918 ymax: 2890563
+CRS:            unknown
+create multiple polygons: 3.75 sec elapsed
+[1] "austria: Polygon created"
+[1] "austria: attributes:year"     "austria: attributes:id"       "austria: attributes:geometry"
+add attributes: 10511.8 sec elapsed
+Deleting source `C:/Users/Lucia/Documents/Diss/Projects/Storm_Attribution/data/intermed/windthrow_austria.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_austria' to data source `C:/Users/Lucia/Documents/Diss/Projects/Storm_Attribution/data/intermed/windthrow_austria.shp' using driver `ESRI Shapefile'
+Writing 36631 features with 2 fields and geometry type Polygon.
+save final file: 1 sec elapsed
+austria finished: 21098.33 sec elapsed
+[1] "austria sucessfully written to disk"

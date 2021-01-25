@@ -1,0 +1,238 @@
+[1] "albania starting..."
+load and reclass disturbances: 1.72 sec elapsed
+load years: 0.02 sec elapsed
+subset years for windthrow: 3.98 sec elapsed
+convert to polygon: 5.09 sec elapsed
+safe, reload  as simple feature and cast: 1.57 sec elapsed
+clean up attributes: 0.03 sec elapsed
+Deleting source `data/intermed/windthrow_albania.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_albania' to data source `data/intermed/windthrow_albania.shp' using driver `ESRI Shapefile'
+Writing 210 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.14 sec elapsed
+albania finished. Total time: : 12.55 sec elapsed
+[1] "albania sucessfully written to disk"
+[1] "austria starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 6.7 sec elapsed
+load years: 0.03 sec elapsed
+subset years for windthrow: 20.38 sec elapsed
+convert to polygon: 20.39 sec elapsed
+safe, reload  as simple feature and cast: 13.63 sec elapsed
+clean up attributes: 0.08 sec elapsed
+Deleting source `data/intermed/windthrow_austria.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_austria' to data source `data/intermed/windthrow_austria.shp' using driver `ESRI Shapefile'
+Writing 39721 features with 2 fields and geometry type Polygon.
+save final shapefile: 1.2 sec elapsed
+austria finished. Total time: : 62.42 sec elapsed
+[1] "austria sucessfully written to disk"
+[1] "belarus starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 9.41 sec elapsed
+load years: 0.08 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 47.17 sec elapsed
+convert to polygon: 8.4 sec elapsed
+safe, reload  as simple feature and cast: 7.14 sec elapsed
+clean up attributes: 0.05 sec elapsed
+Deleting source `data/intermed/windthrow_belarus.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_belarus' to data source `data/intermed/windthrow_belarus.shp' using driver `ESRI Shapefile'
+Writing 32825 features with 2 fields and geometry type Polygon.
+save final shapefile: 1.08 sec elapsed
+belarus finished. Total time: : 73.33 sec elapsed
+[1] "belarus sucessfully written to disk"
+[1] "belgium starting..."
+load and reclass disturbances: 1.64 sec elapsed
+load years: 0.03 sec elapsed
+subset years for windthrow: 8.25 sec elapsed
+convert to polygon: 7.72 sec elapsed
+safe, reload  as simple feature and cast: 3.7 sec elapsed
+clean up attributes: 0.02 sec elapsed
+Deleting source `data/intermed/windthrow_belgium.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_belgium' to data source `data/intermed/windthrow_belgium.shp' using driver `ESRI Shapefile'
+Writing 5608 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.36 sec elapsed
+belgium finished. Total time: : 21.75 sec elapsed
+[1] "belgium sucessfully written to disk"
+[1] "bosniaherzegovina starting..."
+load and reclass disturbances: 2.78 sec elapsed
+load years: 0.02 sec elapsed
+subset years for windthrow: 10.36 sec elapsed
+convert to polygon: 9.67 sec elapsed
+safe, reload  as simple feature and cast: 1.9 sec elapsed
+clean up attributes: 0.05 sec elapsed
+Deleting source `data/intermed/windthrow_bosniaherzegovina.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_bosniaherzegovina' to data source `data/intermed/windthrow_bosniaherzegovina.shp' using driver `ESRI Shapefile'
+Writing 1078 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.16 sec elapsed
+bosniaherzegovina finished. Total time: : 24.97 sec elapsed
+[1] "bosniaherzegovina sucessfully written to disk"
+[1] "bulgaria starting..."
+load and reclass disturbances: 5.37 sec elapsed
+load years: 0.03 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 30.85 sec elapsed
+convert to polygon: 4.28 sec elapsed
+safe, reload  as simple feature and cast: 4.8 sec elapsed
+clean up attributes: 0.04 sec elapsed
+Deleting source `data/intermed/windthrow_bulgaria.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_bulgaria' to data source `data/intermed/windthrow_bulgaria.shp' using driver `ESRI Shapefile'
+Writing 13507 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.52 sec elapsed
+bulgaria finished. Total time: : 45.89 sec elapsed
+[1] "bulgaria sucessfully written to disk"
+[1] "croatia starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 7.83 sec elapsed
+load years: 0.17 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 24.83 sec elapsed
+convert to polygon: 4.39 sec elapsed
+safe, reload  as simple feature and cast: 1.53 sec elapsed
+clean up attributes: 0.02 sec elapsed
+Deleting source `data/intermed/windthrow_croatia.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_croatia' to data source `data/intermed/windthrow_croatia.shp' using driver `ESRI Shapefile'
+Writing 4396 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.25 sec elapsed
+croatia finished. Total time: : 39.03 sec elapsed
+[1] "croatia sucessfully written to disk"
+[1] "czechia starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 6.08 sec elapsed
+load years: 0.62 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 13.58 sec elapsed
+convert to polygon: 3.55 sec elapsed
+safe, reload  as simple feature and cast: 5.47 sec elapsed
+clean up attributes: 0.03 sec elapsed
+Deleting source `data/intermed/windthrow_czechia.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_czechia' to data source `data/intermed/windthrow_czechia.shp' using driver `ESRI Shapefile'
+Writing 27056 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.84 sec elapsed
+czechia finished. Total time: : 30.17 sec elapsed
+[1] "czechia sucessfully written to disk"
+[1] "denmark starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 5.31 sec elapsed
+load years: 0.16 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 19.95 sec elapsed
+convert to polygon: 4.05 sec elapsed
+safe, reload  as simple feature and cast: 4.34 sec elapsed
+clean up attributes: 0.02 sec elapsed
+Deleting source `data/intermed/windthrow_denmark.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_denmark' to data source `data/intermed/windthrow_denmark.shp' using driver `ESRI Shapefile'
+Writing 10282 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.6 sec elapsed
+denmark finished. Total time: : 34.43 sec elapsed
+[1] "denmark sucessfully written to disk"
+[1] "estonia starting..."
+load and reclass disturbances: 3.27 sec elapsed
+load years: 0.02 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 13.51 sec elapsed
+convert to polygon: 2.69 sec elapsed
+safe, reload  as simple feature and cast: 2.64 sec elapsed
+clean up attributes: 0.02 sec elapsed
+Deleting source `data/intermed/windthrow_estonia.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_estonia' to data source `data/intermed/windthrow_estonia.shp' using driver `ESRI Shapefile'
+Writing 7007 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.37 sec elapsed
+estonia finished. Total time: : 22.61 sec elapsed
+[1] "estonia sucessfully written to disk"
+[1] "finland starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 34.93 sec elapsed
+load years: 0.48 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 106.73 sec elapsed
+convert to polygon: 16.65 sec elapsed
+safe, reload  as simple feature and cast: 6.17 sec elapsed
+clean up attributes: 0.01 sec elapsed
+Deleting source `data/intermed/windthrow_finland.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_finland' to data source `data/intermed/windthrow_finland.shp' using driver `ESRI Shapefile'
+Writing 11580 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.49 sec elapsed
+finland finished. Total time: : 165.47 sec elapsed
+[1] "finland sucessfully written to disk"
+[1] "france starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 45.11 sec elapsed
+load years: 0.25 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 184.42 sec elapsed
+convert to polygon: 35.18 sec elapsed
+safe, reload  as simple feature and cast: 707.56 sec elapsed
+clean up attributes: 0.28 sec elapsed
+Deleting source `data/intermed/windthrow_france.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_france' to data source `data/intermed/windthrow_france.shp' using driver `ESRI Shapefile'
+Writing 195665 features with 2 fields and geometry type Polygon.
+save final shapefile: 4.98 sec elapsed
+france finished. Total time: : 977.78 sec elapsed
+[1] "france sucessfully written to disk"
+[1] "germany starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 14.96 sec elapsed
+load years: 0.06 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 87.73 sec elapsed
+convert to polygon: 19.19 sec elapsed
+safe, reload  as simple feature and cast: 358.36 sec elapsed
+clean up attributes: 0.26 sec elapsed
+Deleting source `data/intermed/windthrow_germany.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_germany' to data source `data/intermed/windthrow_germany.shp' using driver `ESRI Shapefile'
+Writing 224452 features with 2 fields and geometry type Polygon.
+save final shapefile: 6.39 sec elapsed
+germany finished. Total time: : 486.97 sec elapsed
+[1] "germany sucessfully written to disk"
+[1] "greece starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 16.73 sec elapsed
+load years: 0.08 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 110.59 sec elapsed
+convert to polygon: 13.19 sec elapsed
+safe, reload  as simple feature and cast: 1.55 sec elapsed
+clean up attributes: 0.03 sec elapsed
+Deleting source `data/intermed/windthrow_greece.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_greece' to data source `data/intermed/windthrow_greece.shp' using driver `ESRI Shapefile'
+Writing 1342 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.17 sec elapsed
+greece finished. Total time: : 142.34 sec elapsed
+[1] "greece sucessfully written to disk"
+[1] "hungary starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 11.3 sec elapsed
+load years: 0.61 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 20.19 sec elapsed
+convert to polygon: 4.2 sec elapsed
+safe, reload  as simple feature and cast: 1.74 sec elapsed
+clean up attributes: 0.01 sec elapsed
+Deleting source `data/intermed/windthrow_hungary.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_hungary' to data source `data/intermed/windthrow_hungary.shp' using driver `ESRI Shapefile'
+Writing 7734 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.38 sec elapsed
+hungary finished. Total time: : 38.49 sec elapsed
+[1] "hungary sucessfully written to disk"
+[1] "ireland starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 7.93 sec elapsed
+load years: 0.47 sec elapsed
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+subset years for windthrow: 14.03 sec elapsed
+convert to polygon: 3.69 sec elapsed
+safe, reload  as simple feature and cast: 2.39 sec elapsed
+clean up attributes: 0.03 sec elapsed
+Deleting source `data/intermed/windthrow_ireland.shp' using driver `ESRI Shapefile'
+Writing layer `windthrow_ireland' to data source `data/intermed/windthrow_ireland.shp' using driver `ESRI Shapefile'
+Writing 11374 features with 2 fields and geometry type Polygon.
+save final shapefile: 0.48 sec elapsed
+ireland finished. Total time: : 29.07 sec elapsed
+[1] "ireland sucessfully written to disk"
+[1] "italy starting..."
+=====|====|====|====|====|====|====|====|====|====--------------------------------------------------                                                  
+load and reclass disturbances: 67.29 sec elapsed
+load years: 0.54 sec elapsed
+Error: [writeStart] insufficient disk space (perhaps from temporary files?)
+In addition: There were 16 warnings (use warnings() to see them)
+> 
