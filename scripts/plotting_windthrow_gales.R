@@ -9,12 +9,18 @@ setwd(wd)
 
 # base map
 europe_sf = st_read("data/europe_countries.shp")
-base_map = ggplot() + geom_sf(data = europe_sf)
+base_map = ggplot() 
 
+threshhold = 20.7
+mode = "biasMean"
 # variables, layers
 Year = seq(from = 1986, to = 2016, by = 1)
 
-Storms = read.csv("data/cyclones/cyclones_named_hydro.txt")
+Storms = read.csv("data/cyclones/cyclones_all.txt")
+
+Storms = Storms %>% dplyr::mutate(
+  hydro_Year = ifelse(Month < 9, Year, Year +1 )
+)
 
 Country = list("albania", "austria", "belarus", "belgium", "bosniaherzegovina",
                "bulgaria", "croatia", "czechia", "denmark", "estonia",
@@ -29,20 +35,28 @@ for (j in c(1:length(Year))) {
   windthrow_map = base_map
   print(paste(Year[j], 'starting...'))
   Y = paste(Year[j], 'added. Total time: ')
-  title = paste0("Year: ", Year[j], "Storms: ")
+  title = paste0("Storms with threshhold ", threshhold, "m/s. \nYear: ", Year[j], "\nStorms: ")
   tic(Y)
   
   #add all storms happening in this year
     tic(paste0("Storms for ", Year[j]))
       for (k in c(1:length(Storms$Name)) ) {
-        if (Storms$Year[k] == Year[j]){
-          stoms_path = paste0("data/cyclones/poly_", Storms$Name[k], ".shp")
-          storm = st_read(target_path, quiet = TRUE)
-          windthrow_map = windthrow_map + geom_sf(storm, alpha = 0.4, color = "#C0C0C0")
+        if (Storms$hydro_Year[k] == Year[j]){
+          print("loop started sucessful")
+          storm_path = paste0("data/storm_outlines/poly_", mode, "_", Storms$Name[k], "_", threshhold, ".shp")
+          storm = st_read(storm_path, quiet = TRUE)
+          windthrow_map = windthrow_map + geom_sf(data = sf::st_geometry(storm),  
+                                                  fill = "#5F9EA0", 
+                                                  color = NA , 
+                                                  alpha = 0.18) 
+            
           
-          title = paste0(title, Storms$Name[k])
+          title = paste0(title, Storms$Name[k], " (Month ",Storms$Month[k], "), ")
+          print(title)
         } 
       }
+    
+    windthrow_map = windthrow_map + geom_sf(data = europe_sf, alpha = 0)
     toc(log = TRUE)
     
   #plot disturbance patches per country
@@ -53,14 +67,15 @@ for (j in c(1:length(Year))) {
       tic(C)
       windthrow_path = paste0("data/intermed/windthrow_", Country[i], ".shp" )
       windthrow_sf = st_read(windthrow_path)
-      windthrow_map = windthrow_map + geom_sf(data = subset(windthrow_sf, year == Year[j]), color = "#D55E00")
+      windthrow_map = windthrow_map + geom_sf(data = subset(windthrow_sf, year == Year[j]), 
+                                              color = "#D55E00")
       toc(log = TRUE)
     }
  
-    windthrow_map = windthrow_map + ggtitle(Year[j])
+    windthrow_map = windthrow_map + ggtitle(title)
     
     tic("plot")
-      target_path = paste0("figures/years/windthrow_storms_", Year[j], ".png" )
+      target_path = paste0("figures/all_storms_", mode, "/windthrow_storms_", threshhold, "_", Year[j], ".png" )
     
       png(target_path)
       print(windthrow_map)

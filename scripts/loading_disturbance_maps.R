@@ -33,6 +33,8 @@ codes = list("al", "at", "by", "be", "ba",
 reclass_list = c(0, 1.5, NA, 2.5, 3.5, NA)
 reclass_m = matrix(reclass_list, ncol = 3, byrow = TRUE)
 
+
+
 for (i in c(34:35)) {
   print(paste(cnts[i], 'starting...'))
   
