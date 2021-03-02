@@ -1,0 +1,102 @@
+---
+title: "era5"
+author: "Lucia S. Layritz"
+date: "18 Februar 2021"
+output: html_document
+---
+
+```{r packages}
+library(raster)
+library(sf)
+library(tictoc)
+library(lubridate)
+```
+
+```{r data}
+wd = "C:/Users/Lucia/Documents/Diss/Projects/Storm_Attribution"
+setwd(wd)
+getwd()
+
+# load wind data
+u10 = raster::brick("./data/era5/era5_fi_wind_uv.nc", varname = "u10")
+v10 = raster::brick("data/era5/era5_fi_wind_uv.nc", varname = "v10")
+```
+
+**Calculate actual wind speed from u and v elements**
+**formulas from https://www.eol.ucar.edu/content/wind-direction-quick-reference**
+
+```{r actual wind speed and direction}
+setwd(wd)
+#windspeed
+w10 = sqrt(u10^2 + v10^2)
+w10_w_d = setZ(w10, as.numeric(gsub("[: -]", "" , getZ(u10), perl=TRUE)), name = "date")
+w10_w_d = w10
+names(w10_w_d) = as.numeric(gsub("[: -]", "" , getZ(u10), perl=TRUE))
+raster::writeRaster(w10_w_d, "data/era5/era5_fi_wind_w_d.nc", 
+                    overwrite = TRUE)
+
+#wind direction
+DperR = (180/pi)
+d10 = 270 - (raster::atan2(v10, u10)*DperR)
+d10 = setZ(d10, as.vector(getZ(u10)), name = "date")
+raster::writeRaster(d10, "data/era5/era5_fi_wind_d.nc")
+```
+
+```{r binarized raster}
+# filter to only include extreme values 
+threshhold_storm = .99
+quantile_speed = raster::quantile(w10$layer.1, probs = threshhold_storm)
+max_speed = max(raster::maxValue(w10))
+
+reclass_matrix = as.matrix(c(0, quantile_speed, 0,
+                             quantile_speed, max_speed , 1 ))
+
+s10 = raster::reclassify(w10, reclass_matrix)
+raster::writeRaster(s10, "data/era5/era5_fi_wind_s.nc")
+```
+  
+
+```{r reduced data set}
+
+s10 = setZ(s10, as.Date(getZ(u10)), name = "date")
+
+delete_layers_with_zeros_only = function(x) {
+  print(getwd())
+  zero_layers = c()
+  reduced_brick = x
+  print(class(reduced_brick))
+  for (i in c(1:raster::nlayers(x))) { 
+    if (raster::cellStats(reduced_brick[[i]], stat = 'sum') < 5) { #less than five pixels contain 1s
+      print(dim(x))
+      print(paste0("Layer", i, "contains only zeros!"))
+      zero_layers = append(zero_layers, i)
+    }
+  }
+  
+  print("Succesfully looped through all layers, start deleting layers")
+  reduced_brick = raster::dropLayer(reduced_brick, zero_layers)
+  
+  raster::writeRaster(reduced_brick, "data/era5/s10_reduced_larger_five_with_date.nc", format="CDF")
+  print(class(reduced_brick))
+}
+
+delete_layers_with_zeros_only(s10)
+```
+
+```{r interaction of storm and windthrow}
+wth_fi_11 = raster::raster("data/attributed_disturbance_maps.tif")
+ex10 = raster::brick("data/era5/s10_reduced_larger_five_with_darenc")
+i10 = wth_fi*ex10 %>%
+  setZ(raster::cellStats(i10, stat = 'sum'), name = "sum")
+```
+
+
+# layer all rasters on top of each other to see where these are (or a more elegant version of the same)
+# alternative: identify time steps where extreme values overlap with windthrow fields
+windthrow_fi_11 = st_read("data/intermed/windthrow_finland.shp") %>%
+  subset(year == 2011)
+
+
+
+
+
