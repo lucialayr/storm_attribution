@@ -150,31 +150,52 @@ assign_storm_to_disturbance = function(Country) {
   return(disturbance_poly_dated)
 }
 
-
-mosaic_map_of_max_windspeed = function(Year, Treshold) {
-  x_test = assign_storms_to_pixel(Year, Treshold)
-  date_vector = as.numeric(str_sub(as.character(names(x_test)), 2, 10))
-  if (dim(x)[3] > 1) { # which.max fails is there is only one layer
-    print("loop entered, x > 1")
-    y = which.max(x)
-    y_rcl = y
-    for (i in c(1:4)) {
-      m = c(i, date_vector[i])
-      rclmat = matrix(m, ncol = 2, byrow = TRUE)
-      y_rcl = reclassify(y_rcl, rclmat)
+mosaic_map_of_max_windspeed = function(Year, Threshold) {
+  x = assign_storms_to_pixel(Year, Treshold)
+  date_vector = as.numeric(str_sub(as.character(names(x)), 2, 10))
+  print(date_vector)
+  if (dim(x)[3] > 1) { 
+    print("more than one storm")
+    path_poly = paste0("data/WISC/wisc_storm_per_pixel/", Year, ".shp")
+    y_poly = st_read(path_poly)
+    for ( i in c(1:length(date_vector))) {
+      mask = y_poly[y_poly$layer == i,]
+      wind_speed = raster::mask(x[[1]], mask)
+      setZ(wind_speed, date_vector[i], name = "date")
+      print(getZ(wind_speed))
+      if (exists("wind_mosaic") == TRUE){
+        wind_mosaic = merge(wind_mosaic, wind_speed)
+      } else {
+      wind_mosaic = wind_speed
+      }
     }
-    
-    
-    
-      
-   return(y)
-    
   } else {
     print("loop entered, x < 1")
-    return(x)
+    wind_mosaic = x
+    setZ(wind_mosaic, date_vector, name = "date")
+  }
+  print(getZ(wind_mosaic))
+  return(wind_mosaic)
+}
+
+
+
+y_poly = st_read("data/WISC/wisc_storm_per_pixel/2000.shp")
+mask_test = y_poly[y_poly$layer == 1,]
+mask = raster::mask(x_test[[1]], mask_test)
+stack_test = raster::stack(x_test, y_rcl)
+
+assign_windspeed = function(z) {
+  for (i in c(1:4)) {
+    if (z[[5]] == as.numeric(str_sub(as.character(names(z)[i]), 2, 10))) {
+      z[[5]] = z[[i]]
+    }
   }
 }
 
+ws_test = assign_windspeed(stack_test)
+
+ws_test = raster::calc(stack_test, fun = assign_windspeed(stack_test))
 # EXECUTION
 
 for (a in c(2014:2017)) {
