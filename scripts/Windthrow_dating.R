@@ -25,12 +25,15 @@ dates = dates %>%
 
 load_storm_in_laea = function (Date, debug = FALSE) {
   storm_path = paste0("data/WISC/WISC_proj/W", Date, "_proj.nc")
-  storm_file = raster::raster(storm_path) %>%
-    raster::projectRaster(crs = "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-  names(storm_file) = Date
-  storm_file = setZ(storm_file, Date)
-  print(getZ(storm_file))
-  return(storm_file)
+  if (file.exists(storm_path) == TRUE) {
+    storm_file = raster::raster(storm_path) %>%
+      raster::projectRaster(crs = "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+    names(storm_file) = Date
+    storm_file = setZ(storm_file, Date)
+    print(getZ(storm_file))
+    return(storm_file)
+  }
+  
 }
 
 
@@ -49,6 +52,7 @@ assign_storms_to_pixel = function(Year, Treshold) {
     if (dates$hyear[i] == Year) {
       print(dates$date[i])
       storm_layer = load_storm_in_laea(dates$date[i])
+      print(storm_layer)
       print("layer loaded")
       storm_layer = classify_with_threshold(storm_layer, 20)
       print("layer classified")
@@ -59,11 +63,13 @@ assign_storms_to_pixel = function(Year, Treshold) {
         storm_stack = addLayer(storm_stack, storm_layer)
       }
       print(dim(storm_stack))
-      return(storm_stack)
+     
     }
   }
+  return(storm_stack)
   
 }
+
 
 create_polygons_of_maxvalues = function(x) {
   date_vector = as.numeric(str_sub(as.character(names(x)), 2, 10))
@@ -91,7 +97,7 @@ write_polygon_storms = function(Year, Threshold) {
   if (class(polygon)[1] == "SpatialPolygonsDataFrame") {
     raster::shapefile(polygon, path)
   } else {
-    sf::st_write(polygon, path)
+    sf::st_write(polygon, path, delete_dsn = TRUE)
   }
 }
 
@@ -111,9 +117,10 @@ assign_storm_to_disturbance = function(Country) {
   
   for (y in c(min(year_list):max(year_list))) {
     disturbance_poly_year = disturbance_poly[disturbance_poly$year == y,]
+  
     
     if (dim(disturbance_poly_year)[1] > 0) {
-      path_storm = paste0("data/WISC/wisc_storm_per_pixel/max_storm_per_pixel_", y, ".shp")
+      path_storm = paste0("data/WISC/wisc_storm_per_pixel/", y, ".shp") #make sure this path is correct
       if (file.exists(path_storm) == TRUE) {
         storm_poly = st_read(path_storm)
         st_crs(storm_poly) = st_crs(disturbance_poly)
@@ -143,12 +150,39 @@ assign_storm_to_disturbance = function(Country) {
   return(disturbance_poly_dated)
 }
 
+
+mosaic_map_of_max_windspeed = function(Year, Treshold) {
+  x_test = assign_storms_to_pixel(Year, Treshold)
+  date_vector = as.numeric(str_sub(as.character(names(x_test)), 2, 10))
+  if (dim(x)[3] > 1) { # which.max fails is there is only one layer
+    print("loop entered, x > 1")
+    y = which.max(x)
+    y_rcl = y
+    for (i in c(1:4)) {
+      m = c(i, date_vector[i])
+      rclmat = matrix(m, ncol = 2, byrow = TRUE)
+      y_rcl = reclassify(y_rcl, rclmat)
+    }
+    
+    
+    
+      
+   return(y)
+    
+  } else {
+    print("loop entered, x < 1")
+    return(x)
+  }
+}
+
 # EXECUTION
 
-for (a in c(1985:2017)) {
+for (a in c(2014:2017)) {
   write_polygon_storms(a, 20)
   
 }
+
+
 
 Country = list("albania", "austria", "belarus", "belgium", "bosniaherzegovina",
                "bulgaria", "croatia", "czechia", "denmark", "estonia",
@@ -161,5 +195,5 @@ Country = list("albania", "austria", "belarus", "belgium", "bosniaherzegovina",
 for (c in c(1:length(Country))) {
   dated_patch = assign_storm_to_disturbance(Country[c])
   target_path = paste0("data/dated_patches/windthrow_",Country[c], "_dated.shp" )
-  st_write(dated_patch, target_path)
+  st_write(dated_patch, target_path, delete_dsn = TRUE)
 }
