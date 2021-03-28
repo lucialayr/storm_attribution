@@ -221,6 +221,62 @@ plot_gg_wind_speed = function(Year) { #untested!!
   return(plot)
 }
 
+rasterize_disturbance = function(Year) {
+  print("...")
+  base_map = st_read("data/europe_countries.shp", quiet = TRUE)
+  
+  path_raster = paste0("data/WISC/mosaic/mosaic_",Year, ".grd")
+  mosaic = raster::stack(path_raster) %>% mask(base_map)
+  date_vector = as.numeric(str_sub(as.character(names(mosaic)), 2, 10))
+  
+  Country = list("albania", "austria", "belarus", "belgium", "bosniaherzegovina",
+                 "bulgaria", "croatia", "czechia", "denmark", "estonia",
+                 "finland", "france", "germany", "greece", "hungary", 
+                 "ireland", "italy", "latvia", "lithuania", "macedonia", 
+                 "moldova", "montenegro", "netherlands", "norway", "poland", 
+                 "portugal", "romania", "serbia", "slovakia", "slovenia", 
+                 "spain", "sweden", "switzerland", "ukraine", "unitedkingdom")
+  
+  print("set-up done")
+  
+  for (i in c(1:length(date_vector))) {
+    print(paste0("Starting ", date_vector[i], "..."))
+    
+    for (c in c(1:length(Country))) {
+      print(paste0("Starting ", Country[c]))
+      disturbance_path = paste0("data/dated_patches/windthrow_", Country[c], "_dated.shp" )
+      disturbance_poly = st_read(disturbance_path, quiet = TRUE)
+      
+      if (date_vector[i] %in% unique(disturbance_poly$storm_date) == TRUE) {
+        disturbance_storm = disturbance_poly[disturbance_poly$storm_date == date_vector[i],] %>%
+          filter(!st_is_empty(.)) %>% st_union()
+        
+        template = mosaic[[i]]
+        
+        country_rast = exactextractr::coverage_fraction(template, disturbance_storm)
+        print(paste0(Country[c], " rasterized"))
+      
+      if (exists("raster_disturbance") == TRUE) {
+          raster_disturbance = raster_disturbance + country_rast[[1]]
+        } else {
+          raster_disturbance = country_rast[[1]]
+        }
+      } 
+    }
+    
+    names(raster_disturbance) = date_vector[i]
+    print(plot(raster_disturbance))
+    
+    if(exists("raster_stack")) {
+      raster_stack = stack(raster_stack, raster_disturbance)
+    } else {
+      raster_stack = raster_disturbance
+    }
+    rm(raster_disturbance)
+    }
+  return(raster_stack)
+}
+
 plot_rasterized_disturbance = function(Year) { 
   base_map = st_read("data/europe_countries.shp")
   plot = ggplot() + geom_sf(data = base_map, fill = "dimgrey") + theme(legend.position = "none")
@@ -228,41 +284,6 @@ plot_rasterized_disturbance = function(Year) {
   colors_light = c("#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500", "#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500")
   colors_low = c("#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558", "#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558")
   
-  path_raster = paste0("data/WISC/mosaic/mosaic_",Year, ".grd")
-  mosaic = raster::stack(path_raster) %>% mask(base_map)
-  date_vector = as.numeric(str_sub(as.character(names(mosaic)), 2, 10))
-  
-  dates = read.csv("data/WISC/WISC_proj/date.txt", header = FALSE, col.names = "date")
-  # create table with years
-  dates = dates %>% 
-    dplyr::mutate(year = as.numeric(str_sub(as.character(date), 1, 4)),
-                  month = as.numeric(str_sub(as.character(date), 5, 6)),
-                  hyear = ifelse(month < 5, year,year + 1))
-  
-  Country = list("albania", "austria", "belarus", "belgium", "bosniaherzegovina")#,
-                 #"bulgaria", "croatia", "czechia", "denmark", "estonia",
-                 #"finland", "france", "germany", "greece", "hungary", 
-                 #"ireland", "italy", "latvia", "lithuania", "macedonia", 
-                 #"moldova", "montenegro", "netherlands", "norway", "poland", 
-                 #"portugal", "romania", "serbia", "slovakia", "slovenia", 
-                 #"spain", "sweden", "switzerland", "ukraine", "unitedkingdom")
-  print("set-up done")
-  
-  for (c in c(1:length(Country))) {
-    disturbance_path = paste0("data/dated_patches/windthrow_", Country[c], "_dated.shp" )
-    disturbance_poly = st_read(disturbance_path)
-    
-    for (i in c(1:length(date_vector))) {
-      if (date_vector[i] %in% unique(disturbance_poly$storm_date) == TRUE) {
-        disturbance_storm = disturbance_poly[disturbance_poly$storm_date == date_vector[i],] %>%
-          filter(!st_is_empty(.)) %>% st_union()
-        
-        template = mosaic[[i]]
-        
-        print("prepared rasteriztation")
-        disturbance_rast = exactextractr::coverage_fraction(template, disturbance_storm)
-        print("exactextract")
-        print(disturbance_rast[[1]])
         
         #data prep plot
         pts = rasterToPoints(disturbance_rast[[1]], spatial = TRUE)
@@ -276,11 +297,9 @@ plot_rasterized_disturbance = function(Year) {
           geom_tile(data = df , aes_string(x = "x", y = "y", alpha = "layer"), color = NA, fill = colors_light[i]) +
           scale_alpha(limits = c(0.001,  1), range= c(0, 1), na.value = 0) + ggnewscale::new_scale("alpha")
       } else {"storm not in country"}
-    }
     print(plot)
-  }
   return(plot)
-  }
+}
     
 
 
@@ -302,6 +321,15 @@ for (a in c(1896:2017)) {
   }
 }
 
+for (a in c(1896:2017)) {
+  test_path = paste0("data/WISC/wisc_storm_per_pixel/", a , ".shp")
+  if(file.exists(test_path)) {
+    raster = rasterize_disturbance(a)
+    path = paste0("data/rasterize_windthrow_on_storms/fine_resolv/disturbance_",a)
+    writeRaster(raster, path, overwrite = TRUE)
+  }
+}
+
 
 
 Country = list("albania", "austria", "belarus", "belgium", "bosniaherzegovina",
@@ -317,3 +345,6 @@ for (c in c(1:length(Country))) {
   target_path = paste0("data/dated_patches/windthrow_",Country[c], "_dated.shp" )
   st_write(dated_patch, target_path, delete_dsn = TRUE)
 }
+
+
+
