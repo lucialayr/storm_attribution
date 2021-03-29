@@ -7,6 +7,7 @@ library(benford)
 library(rgeos)
 library(ggplot2)
 library(ggnewscale)
+library(ggpubr)
 library(exactextractr)
 
 wd = "C:/Users/Lucia/Documents/Diss/Projects/Storm_Attribution/"
@@ -20,8 +21,6 @@ dates = dates %>%
   dplyr::mutate(year = as.numeric(str_sub(as.character(date), 1, 4)),
                 month = as.numeric(str_sub(as.character(date), 5, 6)),
                 hyear = ifelse(month < 5, year,year + 1))
-
-
 
 
 # FUNCTIONS
@@ -205,8 +204,9 @@ plot_gg_wind_speed = function(Year) { #untested!!
   colors_light = c("#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500", "#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500")
   colors_low = c("#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558", "#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558")
   for (i in c(1:length(date_vector))) {
+    
+    # data preparation
     pts = rasterToPoints(mosaic[[i]], spatial = TRUE)
-    # Then to a 'conventional' dataframe
     df  = data.frame(pts)
     print(head(df))
     print(names(mosaic)[i])
@@ -218,6 +218,7 @@ plot_gg_wind_speed = function(Year) { #untested!!
       scale_alpha(limits = c(30,  maxValue(mosaic[[i]])), range= c(0, 1), na.value = 0) + ggnewscale::new_scale("alpha")
   }
   plot = plot + theme(legend.position = "none")
+  print(date_vector)
   return(plot)
 }
 
@@ -264,44 +265,66 @@ rasterize_disturbance = function(Year) {
       } 
     }
     
-    names(raster_disturbance) = date_vector[i]
-    print(plot(raster_disturbance))
-    
-    if(exists("raster_stack")) {
-      raster_stack = stack(raster_stack, raster_disturbance)
-    } else {
-      raster_stack = raster_disturbance
+    if (exists("raster_disturbance") == TRUE ) {
+      names(raster_disturbance) = date_vector[i]
+      
+      if(exists("raster_stack") == TRUE) {
+        raster_stack = stack(raster_stack, raster_disturbance)
+      } else {
+        raster_stack = raster_disturbance
+      }
+      rm(raster_disturbance)
     }
-    rm(raster_disturbance)
+    
+    
     }
   return(raster_stack)
 }
 
-plot_rasterized_disturbance = function(Year) { 
-  base_map = st_read("data/europe_countries.shp")
-  plot = ggplot() + geom_sf(data = base_map, fill = "dimgrey") + theme(legend.position = "none")
+plot_rasterized_disturbance = function(Year) { #not tested
+  path_poly = paste0("data/WISC/wisc_storm_per_pixel/", Year , ".shp")
   
-  colors_light = c("#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500", "#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500")
-  colors_low = c("#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558", "#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558")
-  
-        
-        #data prep plot
-        pts = rasterToPoints(disturbance_rast[[1]], spatial = TRUE)
-        df  = data.frame(pts)
-        print(head(df))
-        
-        plot = plot + 
-          geom_tile(data = df , aes_string(x = "x", y = "y", alpha = "layer"), color = NA, fill = colors_low[i]) +
-          scale_alpha(limits = c(0, 0.001), range= c(0, .9), na.value = .9)+
-          ggnewscale::new_scale("alpha")+
-          geom_tile(data = df , aes_string(x = "x", y = "y", alpha = "layer"), color = NA, fill = colors_light[i]) +
-          scale_alpha(limits = c(0.001,  1), range= c(0, 1), na.value = 0) + ggnewscale::new_scale("alpha")
-      } else {"storm not in country"}
-    print(plot)
-  return(plot)
-}
+  if(file.exists(path_poly)) {
+    base_map = st_read("data/europe_countries.shp")
     
-
+    outline = st_read(path_poly) 
+    st_crs(outline) = st_crs(base_map)
+    outline =  st_intersection(outline, st_union(base_map))
+    
+    path_disturbance = paste0("data/rasterize_windthrow_on_storms/fine_resolv/disturbance_", Year)
+    disturbance = raster::stack(path_disturbance)
+    
+    date_vector = as.numeric(str_sub(as.character(names(disturbance)), 2, 10))
+    
+    colors_light = c("#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500", "#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500")
+    colors_low = c("#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558", "#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558")
+    
+    plot = ggplot() + geom_sf(data = base_map, fill = "dimgrey") + theme(legend.position = "none")
+    
+    for (i in c(1:length(date_vector))) {
+      pts = rasterToPoints(disturbance[[i]], spatial = TRUE)
+      df  = data.frame(pts)
+      print(head(df))
+      plot = plot + 
+        geom_tile(data = df , aes_string(x = "x", y = "y", alpha = "layer"), color = NA, fill = colors_low[i]) +
+        scale_alpha(limits = c(0, 0.001), range= c(0, .9), na.value = .9)+
+        ggnewscale::new_scale("alpha")+
+        geom_tile(data = df , aes_string(x = "x", y = "y", alpha = "layer"), color = NA, fill = colors_light[i]) +
+        scale_alpha(limits = c(0.001,  1), range= c(0, 1), na.value = 0) + ggnewscale::new_scale("alpha")
+    }
+    print(date_vector)
+    return(plot)
+  }
+  }
+  
+ 
+plot_storm_disturbance(Year) { # not tested
+  A = plot_gg_wind_speed(Year)
+  B = plot_rasterized_disturbance(Year)
+  
+  plot = annotage_figure(ggarrange(A, B, nrow = 1, ncol = 2),
+                         top = Year)
+}
 
 
 
@@ -312,7 +335,7 @@ for (a in c(2014:2017)) {
   
 }
 
-for (a in c(1896:2017)) {
+for (a in c(2012:2016)) {
   test_path = paste0("data/WISC/wisc_storm_per_pixel/", a , ".shp")
   if(file.exists(test_path)) {
     mosaic = mosaic_map_of_max_windspeed(a, 20)
@@ -321,7 +344,7 @@ for (a in c(1896:2017)) {
   }
 }
 
-for (a in c(1896:2017)) {
+for (a in c(2012:2016)) {
   test_path = paste0("data/WISC/wisc_storm_per_pixel/", a , ".shp")
   if(file.exists(test_path)) {
     raster = rasterize_disturbance(a)
