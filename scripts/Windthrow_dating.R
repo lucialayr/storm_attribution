@@ -7,7 +7,7 @@ library(benford)
 library(rgeos)
 library(ggplot2)
 library(ggnewscale)
-library(ggpubr)
+library(cowplot)
 library(exactextractr)
 
 wd = "C:/Users/Lucia/Documents/Diss/Projects/Storm_Attribution/"
@@ -184,15 +184,17 @@ mosaic_map_of_max_windspeed = function(Year, Threshold) {
 
 
 
-plot_gg_wind_speed = function(Year) { #untested!!
-  base_map = st_read("data/europe_countries.shp")
+plot_gg_wind_speed = function(Year) { 
+  
+  print(paste0(Year, " starting, storm"))
+  base_map = st_read("data/europe_countries.shp", quiet = TRUE)
   europe_outline = st_union(base_map)
   
   path_raster = paste0("data/WISC/mosaic/mosaic_",Year, ".grd")
   mosaic = raster::stack(path_raster) %>% mask(base_map)
   
   path_poly = paste0("data/WISC/wisc_storm_per_pixel/", Year , ".shp")
-  outline = st_read(path_poly) 
+  outline = st_read(path_poly, quiet = TRUE) 
   
   st_crs(outline) = st_crs(base_map)
   outline =  st_intersection(outline, st_union(base_map))
@@ -203,19 +205,21 @@ plot_gg_wind_speed = function(Year) { #untested!!
     geom_sf(data = outline, fill = NA)
   colors_light = c("#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500", "#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500")
   colors_low = c("#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558", "#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558")
+  
+  print("set up done")
+  
   for (i in c(1:length(date_vector))) {
-    
     # data preparation
     pts = rasterToPoints(mosaic[[i]], spatial = TRUE)
     df  = data.frame(pts)
-    print(head(df))
-    print(names(mosaic)[i])
+    #print(head(df))
+    #print(names(mosaic)[i])
     plot = plot + 
       geom_tile(data = df , aes_string(x = "x", y = "y", alpha = names(mosaic)[i]), color = NA, fill = colors_low[i]) +
-      scale_alpha(limits = c(20, 30), range= c(0, .9), na.value = .9)+
+      scale_alpha(limits = c(20, 50), range= c(0, .9), na.value = .9)+
       ggnewscale::new_scale("alpha")+
       geom_tile(data = df , aes_string(x = "x", y = "y", alpha = names(mosaic)[i]), color = NA, fill = colors_light[i]) +
-      scale_alpha(limits = c(30,  maxValue(mosaic[[i]])), range= c(0, 1), na.value = 0) + ggnewscale::new_scale("alpha")
+      scale_alpha(limits = c(40,  80), range= c(0, 1), na.value = 0) + ggnewscale::new_scale("alpha")
   }
   plot = plot + theme(legend.position = "none")
   print(date_vector)
@@ -275,55 +279,67 @@ rasterize_disturbance = function(Year) {
       }
       rm(raster_disturbance)
     }
-    
-    
     }
   return(raster_stack)
 }
 
 plot_rasterized_disturbance = function(Year) { #not tested
+  
+  print(paste0(Year, " starting, disturbance"))
   path_poly = paste0("data/WISC/wisc_storm_per_pixel/", Year , ".shp")
   
   if(file.exists(path_poly)) {
-    base_map = st_read("data/europe_countries.shp")
+    base_map = st_read("data/europe_countries.shp", quiet = TRUE)
     
-    outline = st_read(path_poly) 
+    outline = st_read(path_poly, quiet = TRUE) 
     st_crs(outline) = st_crs(base_map)
     outline =  st_intersection(outline, st_union(base_map))
     
     path_disturbance = paste0("data/rasterize_windthrow_on_storms/fine_resolv/disturbance_", Year)
-    disturbance = raster::stack(path_disturbance)
+    disturbance = raster::stack(path_disturbance) %>% 
+      raster::crop(base_map) %>%
+      raster::mask(base_map)
     
     date_vector = as.numeric(str_sub(as.character(names(disturbance)), 2, 10))
     
     colors_light = c("#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500", "#14F57D", "#FFD500", "#65FC24", "#2347FD", "#FF5500")
     colors_low = c("#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558", "#4DB57D", "#BD9756", "#84C668", "#5667BD", "#DF8558")
     
-    plot = ggplot() + geom_sf(data = base_map, fill = "dimgrey") + theme(legend.position = "none")
-    
+    plot = ggplot() + geom_sf(data = st_union(base_map), fill = "dimgrey")  +
+      geom_sf(data = outline, fill = NA) +
+      theme_bw() + theme(legend.position = "none")
+      
+    print("set up done")
     for (i in c(1:length(date_vector))) {
       pts = rasterToPoints(disturbance[[i]], spatial = TRUE)
       df  = data.frame(pts)
-      print(head(df))
+      #print(head(df))
       plot = plot + 
-        geom_tile(data = df , aes_string(x = "x", y = "y", alpha = "layer"), color = NA, fill = colors_low[i]) +
-        scale_alpha(limits = c(0, 0.001), range= c(0, .9), na.value = .9)+
+        geom_tile(data = df , aes_string(x = "x", y = "y", alpha = paste0("X", date_vector[i])),  color = NA, fill = colors_low[i]) +
+        scale_alpha(limits = c(0, 0.05), range= c(0, .9), na.value = .9) +
         ggnewscale::new_scale("alpha")+
-        geom_tile(data = df , aes_string(x = "x", y = "y", alpha = "layer"), color = NA, fill = colors_light[i]) +
-        scale_alpha(limits = c(0.001,  1), range= c(0, 1), na.value = 0) + ggnewscale::new_scale("alpha")
-    }
+        geom_tile(data = df , aes_string(x = "x", y = "y", alpha = paste0("X", date_vector[i])), color = NA, fill = colors_light[i]) +
+        scale_alpha(limits = c(0.05,  1), range= c(0, 1), na.value = 0) + ggnewscale::new_scale("alpha")
+        }
     print(date_vector)
     return(plot)
   }
-  }
+}
   
  
-plot_storm_disturbance(Year) { # not tested
+plot_storm_disturbance = function(Year) { 
   A = plot_gg_wind_speed(Year)
   B = plot_rasterized_disturbance(Year)
   
-  plot = annotage_figure(ggarrange(A, B, nrow = 1, ncol = 2),
-                         top = Year)
+  plot_row = plot_grid(A, B)
+  
+  title = ggdraw() + 
+    draw_label(Year, x = 0, hjust = 0) +
+    theme(plot.margin = margin(0, 0, 0, 0))
+  
+  plot_grid(title, plot_row, 
+            ncol = 1, 
+            rel_heights = c(0.05, 1)) #https://wilkelab.org/cowplot/articles/plot_grid.html
 }
 
 
@@ -352,6 +368,19 @@ for (a in c(2012:2016)) {
     writeRaster(raster, path, overwrite = TRUE)
   }
 }
+
+for (a in c(1999:2000)) {
+  test_path = paste0("data/WISC/wisc_storm_per_pixel/", a , ".shp")
+  if(file.exists(test_path)) {
+    plot = plot_storm_disturbance(a)
+    path = paste0("figures/storm_vs_dist/storm_dist_",a, ".pdf")
+    
+    pdf(path)
+    print(plot)
+    dev.off()
+  }
+}
+
 
 
 
